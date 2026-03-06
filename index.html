@@ -1,0 +1,693 @@
+<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Rate Calculator</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+    .container{max-width:1100px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.15);overflow:hidden}
+    .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:22px 20px;text-align:center}
+    .header h1{font-size:1.6rem;margin-bottom:6px}
+    .header p{font-size:0.95rem;opacity:0.95}
+    .controls{background:#fafafa;padding:12px 16px;border-bottom:1px solid #eee;text-align:center}
+    .control-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:0;padding:10px 18px;border-radius:999px;font-weight:600;cursor:pointer;margin:0 6px}
+    .control-btn.reset{background:linear-gradient(135deg,#ff6b6b,#ee5a5a)}
+
+    /* Make calculator sections stacked but aligned in columns for clarity */
+    .calculator-grid{display:block;padding:12px}
+    .calc-card{
+      display:grid;
+      grid-template-columns:200px 1fr 140px 160px;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      border-bottom:1px solid #eee;
+      background:transparent;
+      min-height:64px;
+    }
+    .calc-card h3{grid-column:1/2;margin:0;font-size:1rem;color:#333;display:flex;align-items:center;gap:8px}
+    .calc-card h3::before{content:"";width:10px;height:10px;border-radius:50%;background:#667eea;display:inline-block}
+    .calc-card.calculated h3::before{background:#38ef7d}
+
+    .input-row{grid-column:2/3;display:flex;gap:12px;align-items:center;margin:0;flex-wrap:wrap}
+    .input-group{min-width:100px;flex:1}
+    .input-group label{display:block;font-size:0.8rem;color:#555;margin-bottom:6px;font-weight:600}
+    .input-group input,.input-group select{width:100%;padding:8px;border:1px solid #e6e6e6;border-radius:6px;font-size:0.95rem}
+    .input-group input:focus,.input-group select:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.06)}
+
+    .calc-btn{grid-column:3/4;padding:8px 12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:0;border-radius:6px;font-weight:700;cursor:pointer;white-space:nowrap;justify-self:center}
+    .calc-btn.small{padding:6px 10px;font-size:0.9rem}
+
+  .result-box{grid-column:4/5;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:6px;border:1px solid #e6f6ec;color:#11998e;font-weight:700;justify-self:end}
+  .result-label{font-size:0.85rem;color:#666;font-weight:600}
+  .result-value{font-size:1rem;color:#11998e}
+
+  /* status badge as small colored circle */
+  .status-badge{width:12px;height:12px;border-radius:50%;display:inline-block;margin-left:8px;vertical-align:middle}
+  .status-badge.pending{background:#ff6b6b}
+  .status-badge.done{background:#38ef7d}
+
+    .formula-display{grid-column:2/5;font-size:0.8rem;color:#666;margin-top:8px;padding-top:6px}
+
+    .summary-section{background:linear-gradient(135deg,#f5f7fa 0%,#e4e8ec 100%);padding:28px;margin-top:18px}
+    .summary-section h2{font-size:1.4rem;text-align:center;margin-bottom:18px}
+    .summary-table{width:100%;max-width:900px;margin:0 auto 18px;background:#fff;border-radius:10px;overflow:hidden}
+    .summary-table table{width:100%;border-collapse:collapse}
+    .summary-table th{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:10px;text-align:left;font-weight:600}
+    .summary-table td{padding:10px;border-bottom:1px solid #eee}
+    .grand-total-display{background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%);color:#fff;padding:18px;border-radius:10px;max-width:900px;margin:0 auto;text-align:center}
+    .calculation-breakdown{font-size:1rem;margin-bottom:10px}
+    .final-amount{font-size:1.4rem;font-weight:800}
+
+    @media (max-width:900px){
+      .calc-card{display:flex;flex-direction:column;align-items:flex-start;padding:12px;gap:8px}
+      .calc-card h3{flex:0 0 auto}
+      .input-row{width:100%}
+      .calc-btn{width:100%;grid-column:auto;justify-self:auto}
+      .result-box{width:100%;grid-column:auto;justify-self:auto}
+      .formula-display{margin-left:0;margin-top:6px}
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📦 Product Rate Calculator</h1>
+      <p>Calculate individual components or all together - your choice!</p>
+    </div>
+
+    <div class="controls">
+      <button type="button" class="control-btn" onclick="calculateAll()">🚀 Calculate All Together</button>
+      <button type="button" class="control-btn reset" onclick="resetAll()">🔄 Reset Everything</button>
+    </div>
+
+  <div class="calculator-grid">
+      <!-- 1. Plate -->
+      <div class="calc-card" id="card-plate">
+        <h3>1. Plate <span class="status-badge pending" id="status-plate" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group" style="flex: 2;">
+            <label>Number of Colors</label>
+            <input type="number" id="plate-colors" placeholder="Enter colors" min="1" onchange="autoCalculate && calculatePlate()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculatePlate()">Calculate Plate Cost</button>
+        <div class="result-box" id="plate-result">
+          <span class="result-label">Plate Cost:</span>
+          <span class="result-value" id="plate-value">0 RS</span>
+        </div>
+        <div class="formula-display">2200 × Colors</div>
+      </div>
+
+      <!-- 2. Card -->
+      <div class="calc-card" id="card-card">
+        <h3>2. Card <span class="status-badge pending" id="status-card" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Length</label>
+            <input type="number" id="card-length" placeholder="L" onchange="autoCalculate && calculateCard()">
+          </div>
+          <div class="input-group">
+            <label>Width</label>
+            <input type="number" id="card-width" placeholder="W" onchange="autoCalculate && calculateCard()">
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Gram</label>
+            <input type="number" id="card-gram" placeholder="gms" onchange="autoCalculate && calculateCard()">
+          </div>
+          <div class="input-group">
+            <label>Rate</label>
+            <input type="number" id="card-rate" placeholder="RS" onchange="autoCalculate && calculateCard()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculateCard()">Calculate Card Cost</button>
+        <div class="result-box" id="card-result">
+          <span class="result-label">Card Cost:</span>
+          <span class="result-value" id="card-value">0 RS</span>
+        </div>
+  <div class="formula-display">L × W × Gram ÷ 1,550,000 × Rate</div>
+      </div>
+
+      <!-- 3. Printing -->
+      <div class="calc-card" id="card-printing">
+        <h3>3. Printing <span class="status-badge pending" id="status-printing" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group" style="min-width:120px;">
+            <label>Number of Colors</label>
+            <input type="number" id="numColors" min="1" placeholder="e.g. 1,2,4" onchange="autoCalculate && calculatePrinting()">
+          </div>
+          <div class="input-group" style="flex: 2;">
+            <label>Total Sheets</label>
+            <input type="number" id="numSheets" min="1" placeholder="Enter total sheets" onchange="autoCalculate && calculatePrinting()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculatePrinting()">Calculate Printing Cost</button>
+        <div class="result-box" id="printing-result">
+          <span class="result-label">Printing Cost:</span>
+          <span class="result-value" id="printing-value">0 RS</span>
+        </div>
+        <div class="formula-display">Price per sheet mapping: 1 → 1.5 Rs, 2 → 3 Rs, 4 → 6 Rs. Total = pricePerSheet × Total Sheets</div>
+      </div>
+
+      <!-- 4. Lamination -->
+      <div class="calc-card" id="card-lamination">
+        <h3>4. Lamination <span class="status-badge pending" id="status-lamination" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Length</label>
+            <input type="number" id="lam-length" placeholder="L" onchange="autoCalculate && calculateLamination()">
+          </div>
+          <div class="input-group">
+            <label>Width</label>
+            <input type="number" id="lam-width" placeholder="W" onchange="autoCalculate && calculateLamination()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculateLamination()">Calculate Lamination Cost</button>
+        <div class="result-box" id="lamination-result">
+          <span class="result-label">Lamination Cost:</span>
+          <span class="result-value" id="lamination-value">0 RS</span>
+        </div>
+        <div class="formula-display">L × W ÷ 62.5</div>
+      </div>
+
+      <!-- 5. Dye Making -->
+      <div class="calc-card" id="card-dye-making">
+        <h3>5. Dye Making <span class="status-badge pending" id="status-dye-making" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Length</label>
+            <input type="number" id="dye-length" placeholder="L" onchange="autoCalculate && calculateDyeMaking()">
+          </div>
+          <div class="input-group">
+            <label>Width</label>
+            <input type="number" id="dye-width" placeholder="W" onchange="autoCalculate && calculateDyeMaking()">
+          </div>
+          <div class="input-group">
+            <label>Qty</label>
+            <!-- Allow user to enter any desired quantity (0..n). Calculation requires Qty > 0. -->
+            <input type="number" id="dye-qty" placeholder="Qty" min="0" onchange="autoCalculate && calculateDyeMaking()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculateDyeMaking()">Calculate Dye Making Cost</button>
+        <div class="result-box" id="dye-making-result">
+          <span class="result-label">Dye Making Cost:</span>
+          <span class="result-value" id="dye-making-value">0 RS</span>
+        </div>
+        <div class="formula-display">L × W × 4.5 ÷ Quantity</div>
+      </div>
+
+      <!-- 6. Dye Karai -->
+      <div class="calc-card" id="card-dye-karai">
+        <h3>6. Dye Karai <span class="status-badge pending" id="status-dye-karai" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group" style="flex: 2;">
+            <label>Quantity of Sheets</label>
+            <input type="number" id="dye-karai-sheets" placeholder="Enter sheets" min="1" onchange="autoCalculate && calculateDyeKarai()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculateDyeKarai()">Calculate Dye Karai Cost</button>
+        <div class="result-box" id="dye-karai-result">
+          <span class="result-label">Dye Karai Cost:</span>
+          <span class="result-value" id="dye-karai-value">0 RS</span>
+        </div>
+        <div class="formula-display">Sheets × 1 RS</div>
+      </div>
+
+      <!-- 7. Binding -->
+      <div class="calc-card" id="card-binding">
+        <h3>7. Binding <span class="status-badge pending" id="status-binding" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group" style="flex: 2;">
+            <label>Quantity</label>
+            <input type="number" id="binding-qty" placeholder="Enter quantity" min="1" onchange="autoCalculate && calculateBinding()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculateBinding()">Calculate Binding Cost</button>
+        <div class="result-box" id="binding-result">
+          <span class="result-label">Binding Cost:</span>
+          <span class="result-value" id="binding-value">0 RS</span>
+        </div>
+        <div class="formula-display">400 ÷ Quantity</div>
+      </div>
+
+      <!-- 8. Nali -->
+      <div class="calc-card" id="card-nali">
+        <h3>8. Nali <span class="status-badge pending" id="status-nali" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Height (H)</label>
+            <input type="number" id="nali-height" placeholder="H" onchange="autoCalculate && calculateNali()">
+          </div>
+          <div class="input-group">
+            <label>Rate</label>
+            <input type="number" id="nali-rate" placeholder="Rate" onchange="autoCalculate && calculateNali()">
+          </div>
+          <div class="input-group">
+            <label>Length (L)</label>
+            <input type="number" id="nali-length" placeholder="L" onchange="autoCalculate && calculateNali()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculateNali()">Calculate Nali Cost</button>
+        <div class="result-box" id="nali-result">
+          <span class="result-label">Nali Cost (per piece):</span>
+          <span class="result-value" id="nali-value">0 RS</span>
+        </div>
+        <div class="formula-display">H × Rate ÷ 2400 × L</div>
+      </div>
+
+      <!-- 9. Silicat -->
+      <div class="calc-card" id="card-silicat">
+        <h3>9. Silicat <span class="status-badge pending" id="status-silicat" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Length (L)</label>
+            <input type="number" id="silicat-length" placeholder="L" onchange="autoCalculate && calculateSilicat()">
+          </div>
+          <div class="input-group">
+            <label>Width (W)</label>
+            <input type="number" id="silicat-width" placeholder="W" onchange="autoCalculate && calculateSilicat()">
+          </div>
+          <div class="input-group">
+            <label>Qty</label>
+            <input type="number" id="silicat-qty" placeholder="Qty" min="1" onchange="autoCalculate && calculateSilicat()">
+          </div>
+        </div>
+  <button type="button" class="calc-btn" onclick="calculateSilicat()">Calculate Silicat Cost</button>
+        <div class="result-box" id="silicat-result">
+          <span class="result-label">Silicat Cost (per piece):</span>
+          <span class="result-value" id="silicat-value">0 RS</span>
+        </div>
+        <div class="formula-display">L × W × 0.0035 × Qty</div>
+      </div>
+    </div>
+
+    <!-- Summary Table Section -->
+    <div class="summary-section">
+      <h2>📊 Calculation Summary</h2>
+
+      <div class="summary-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 10%;">#</th>
+              <th style="width: 40%;">Component Name</th>
+              <th style="width: 30%;">Status</th>
+              <th style="width: 20%; text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="summary-tbody">
+            <tr id="row-plate" class="not-calculated">
+              <td>1</td>
+              <td><strong>Plate</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-card" class="not-calculated">
+              <td>2</td>
+              <td><strong>Card</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-printing" class="not-calculated">
+              <td>3</td>
+              <td><strong>Printing</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-lamination" class="not-calculated">
+              <td>4</td>
+              <td><strong>Lamination</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-dye-making" class="not-calculated">
+              <td>5</td>
+              <td><strong>Dye Making</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-dye-karai" class="not-calculated">
+              <td>6</td>
+              <td><strong>Dye Karai</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-binding" class="not-calculated">
+              <td>7</td>
+              <td><strong>Binding</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-nali" class="not-calculated">
+              <td>8</td>
+              <td><strong>Nali</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-silicat" class="not-calculated">
+              <td>9</td>
+              <td><strong>Silicat</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Grand Total with Breakdown -->
+      <div class="grand-total-display">
+        <div style="font-size: 1.1em; margin-bottom: 10px; opacity: 0.9;">Total Product Rate Calculation</div>
+        <div class="calculation-breakdown" id="calculation-breakdown">
+          <span style="opacity: 0.7;">Enter values above to see the calculation</span>
+        </div>
+        <div style="border-top: 2px solid rgba(255,255,255,0.3); margin: 15px 0;"></div>
+        <div class="final-amount" id="final-grand-total">0 RS</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Store all calculated values and states
+    let calculations = {
+      plate: { value: 0, calculated: false, name: 'Plate' },
+      card: { value: 0, calculated: false, name: 'Card' },
+      printing: { value: 0, calculated: false, name: 'Printing' },
+      lamination: { value: 0, calculated: false, name: 'Lamination' },
+      dyeMaking: { value: 0, calculated: false, name: 'Dye Making' },
+      dyeKarai: { value: 0, calculated: false, name: 'Dye Karai' },
+      binding: { value: 0, calculated: false, name: 'Binding' },
+      nali: { value: 0, calculated: false, name: 'Nali' },
+      silicat: { value: 0, calculated: false, name: 'Silicat' }
+    };
+
+    let autoCalculate = false;
+
+    // Helper: convert camelCase keys (e.g. dyeMaking) to kebab-case used in DOM ids (dye-making)
+    function idSuffix(key) {
+      return key.replace(/([A-Z])/g, '-$1').toLowerCase();
+    }
+
+    function updateDisplay(key, value) {
+      calculations[key].value = value;
+      calculations[key].calculated = true;
+
+      // Update card styling
+      const suffix = idSuffix(key);
+      const cardEl = document.getElementById('card-' + suffix);
+      if (cardEl) {
+        cardEl.classList.add('calculated');
+        cardEl.classList.remove('not-calculated');
+      }
+
+      // Update status badge (show colored circle and accessible label)
+      const badge = document.getElementById('status-' + suffix);
+      if (badge) {
+        badge.classList.remove('pending');
+        badge.classList.add('done');
+        badge.setAttribute('title', 'Done');
+        badge.setAttribute('aria-label', 'Done');
+      }
+
+      // Show result box
+      const resultBox = document.getElementById(suffix + '-result');
+      const valueEl = document.getElementById(suffix + '-value');
+      if (resultBox) resultBox.classList.add('show');
+      if (valueEl) valueEl.textContent = value.toFixed(2) + ' RS';
+
+      // Update summary table
+      const row = document.getElementById('row-' + suffix);
+      if (row) {
+        row.classList.remove('not-calculated');
+        row.classList.add('calculated');
+        // guard cells exist
+        if (row.cells && row.cells.length >= 4) {
+          row.cells[2].textContent = '✓ Calculated';
+          row.cells[3].textContent = value.toFixed(2) + ' RS';
+        }
+      }
+
+      updateGrandTotal();
+    }
+
+    function calculatePlate() {
+      const colors = parseFloat(document.getElementById('plate-colors').value) || 0;
+      if (colors <= 0) {
+        alert('Please enter number of colors');
+        return;
+      }
+      const result = 2200 * colors;
+      updateDisplay('plate', result);
+    }
+
+    function calculateCard() {
+      const length = parseFloat(document.getElementById('card-length').value) || 0;
+      const width = parseFloat(document.getElementById('card-width').value) || 0;
+      const gram = parseFloat(document.getElementById('card-gram').value) || 0;
+      const rate = parseFloat(document.getElementById('card-rate').value) || 0;
+
+      if (!length || !width || !gram || !rate) {
+        alert('Please fill all Card fields');
+        return;
+      }
+
+      // Correct divisor is 1,550,000 (not 150,000)
+      const result = (length * width * gram / 1550000) * rate;
+      updateDisplay('card', result);
+    }
+
+    function calculatePrinting() {
+      const numColors = parseInt(document.getElementById('numColors').value, 10) || 0;
+      const numSheets = parseInt(document.getElementById('numSheets').value, 10) || 0;
+
+      if (!numColors || !numSheets) {
+        alert('Please enter number of colors and total sheets');
+        return;
+      }
+
+      let pricePerSheet = 0;
+      if (numColors === 1) {
+        pricePerSheet = 1.5;
+      } else if (numColors === 2) {
+        pricePerSheet = 3;
+      } else if (numColors === 4) {
+        pricePerSheet = 6;
+      } else {
+        // for unsupported color counts, you may set a default or handle separately
+        pricePerSheet = 0;
+      }
+
+      const result = pricePerSheet * numSheets;
+      updateDisplay('printing', result);
+    }
+
+    function calculateLamination() {
+      const length = parseFloat(document.getElementById('lam-length').value) || 0;
+      const width = parseFloat(document.getElementById('lam-width').value) || 0;
+
+      if (!length || !width) {
+        alert('Please enter length and width');
+        return;
+      }
+
+      const result = (length * width) / 62.5;
+      updateDisplay('lamination', result);
+    }
+
+    function calculateDyeMaking() {
+      const length = parseFloat(document.getElementById('dye-length').value) || 0;
+      const width = parseFloat(document.getElementById('dye-width').value) || 0;
+      const qty = parseFloat(document.getElementById('dye-qty').value);
+
+      // qty may be 0 or NaN; ensure required fields and qty > 0 to avoid divide-by-zero
+      if (!length || !width || !Number.isFinite(qty) || qty <= 0) {
+        alert('Please enter valid Length, Width and Qty (Qty must be greater than 0) for Dye Making');
+        return;
+      }
+
+      const result = (length * width * 4.5) / qty;
+      updateDisplay('dyeMaking', result);
+    }
+
+    function calculateDyeKarai() {
+      const sheets = parseFloat(document.getElementById('dye-karai-sheets').value) || 0;
+      if (!sheets) {
+        alert('Please enter quantity of sheets');
+        return;
+      }
+      const result = sheets * 1;
+      updateDisplay('dyeKarai', result);
+    }
+
+    function calculateBinding() {
+      const qty = parseFloat(document.getElementById('binding-qty').value) || 0;
+      if (!qty) {
+        alert('Please enter quantity');
+        return;
+      }
+      const result = 400 / qty;
+      updateDisplay('binding', result);
+    }
+
+    function calculateNali() {
+      const height = parseFloat(document.getElementById('nali-height').value) || 0;
+      const rate = parseFloat(document.getElementById('nali-rate').value) || 0;
+      const length = parseFloat(document.getElementById('nali-length').value) || 0;
+
+      if (!height || !rate || !length) {
+        alert('Please fill all Nali fields');
+        return;
+      }
+
+      const result = (height * rate / 2400) * length;
+      updateDisplay('nali', result);
+    }
+
+    function calculateSilicat() {
+      const length = parseFloat(document.getElementById('silicat-length').value) || 0;
+      const width = parseFloat(document.getElementById('silicat-width').value) || 0;
+      const qty = parseFloat(document.getElementById('silicat-qty').value) || 0;
+
+      if (!length || !width || !qty) {
+        alert('Please fill all Silicat fields');
+        return;
+      }
+
+      const result = length * width * 0.0035 * qty;
+      updateDisplay('silicat', result);
+    }
+
+    function calculateAll() {
+      // Try to calculate all that have values
+      const colors = document.getElementById('plate-colors').value;
+      if (colors) calculatePlate();
+
+      if (document.getElementById('card-length').value && 
+        document.getElementById('card-width').value && 
+        document.getElementById('card-gram').value && 
+        document.getElementById('card-rate').value) {
+        calculateCard();
+      }
+
+      if (document.getElementById('numColors') && document.getElementById('numSheets') &&
+        document.getElementById('numColors').value && document.getElementById('numSheets').value) calculatePrinting();
+
+      if (document.getElementById('lam-length').value && document.getElementById('lam-width').value) {
+        calculateLamination();
+      }
+
+      if (document.getElementById('dye-length').value && 
+        document.getElementById('dye-width').value && 
+        document.getElementById('dye-qty').value) {
+        calculateDyeMaking();
+      }
+
+      if (document.getElementById('dye-karai-sheets').value) calculateDyeKarai();
+
+      if (document.getElementById('binding-qty').value) calculateBinding();
+
+      if (document.getElementById('nali-height').value && 
+        document.getElementById('nali-rate').value && 
+        document.getElementById('nali-length').value) {
+        calculateNali();
+      }
+
+      if (document.getElementById('silicat-length').value && 
+        document.getElementById('silicat-width').value && 
+        document.getElementById('silicat-qty').value) {
+        calculateSilicat();
+      }
+
+      // Scroll to summary
+      document.querySelector('.summary-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateGrandTotal() {
+      let total = 0;
+      let calculatedItems = [];
+      let breakdownHTML = '';
+
+      for (let key in calculations) {
+        if (calculations[key].calculated) {
+          total += calculations[key].value;
+          calculatedItems.push({
+            name: calculations[key].name,
+            value: calculations[key].value
+          });
+        }
+      }
+
+      // Build breakdown string
+      if (calculatedItems.length > 0) {
+        breakdownHTML = calculatedItems.map((item, index) => {
+          const plus = index < calculatedItems.length - 1 ? 
+            '<span class="plus">+</span>' : 
+            '<span class="equals">=</span>';
+          return `<span style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px; margin: 2px; display: inline-block;">${item.name}: ${item.value.toFixed(2)}</span> ${plus}`;
+        }).join(' ');
+
+        document.getElementById('calculation-breakdown').innerHTML = breakdownHTML;
+        document.getElementById('final-grand-total').textContent = total.toFixed(2) + ' RS';
+      } else {
+        document.getElementById('calculation-breakdown').innerHTML = '<span style="opacity: 0.7;">Enter values above to see the calculation</span>';
+        document.getElementById('final-grand-total').textContent = '0 RS';
+      }
+    }
+
+    function resetAll() {
+      // Reset all inputs
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => input.value = '');
+
+      const selects = document.querySelectorAll('select');
+      selects.forEach(select => select.selectedIndex = 0);
+
+      // Reset all values and states
+      for (let key in calculations) {
+        calculations[key].value = 0;
+        calculations[key].calculated = false;
+
+                // Reset card styling
+                const suffix = idSuffix(key);
+                const cardEl = document.getElementById('card-' + suffix);
+                if (cardEl) {
+                  cardEl.classList.remove('calculated');
+                  cardEl.classList.add('not-calculated');
+                }
+
+                // Reset status badge to pending circle with accessible label
+                const badge = document.getElementById('status-' + suffix);
+                if (badge) {
+                  badge.classList.remove('done');
+                  badge.classList.add('pending');
+                  badge.setAttribute('title', 'Pending');
+                  badge.setAttribute('aria-label', 'Pending');
+                }
+
+                // Hide result box
+                const resultBox = document.getElementById(suffix + '-result');
+                const valueEl = document.getElementById(suffix + '-value');
+                if (resultBox) resultBox.classList.remove('show');
+                if (valueEl) valueEl.textContent = '0 RS';
+
+                // Reset summary table row
+                const row = document.getElementById('row-' + suffix);
+        row.classList.remove('calculated');
+        row.classList.add('not-calculated');
+        row.cells[2].textContent = 'Not calculated yet';
+        row.cells[3].textContent = '-';
+      }
+
+      updateGrandTotal();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
