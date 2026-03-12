@@ -90,17 +90,37 @@
       <div class="calc-card" id="card-plate">
         <h3>1. Plate <span class="status-badge pending" id="status-plate" role="status" aria-label="Pending" title="Pending"></span></h3>
         <div class="input-row">
-          <div class="input-group" style="flex: 2;">
+          <div class="input-group">
+            <label>Plate Amount</label>
+            <select id="plate-amount" onchange="autoCalculate && calculatePlate()">
+              <option value="2200">2200</option>
+              <option value="1600">1600</option>
+              <option value="400">400</option>
+              <option value="250">250</option>
+            </select>
+          </div>
+          <div class="input-group">
             <label>Number of Colors</label>
-            <input type="number" id="plate-colors" placeholder="Enter colors" min="1" onchange="autoCalculate && calculatePlate()">
+            <select id="plate-colors" onchange="autoCalculate && calculatePlate()">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex: 2;">
+            <label>Total Sheets</label>
+            <input type="number" id="plate-sheets" placeholder="Enter total sheets (500 - 100000)" min="500" max="100000" onchange="autoCalculate && calculatePlate()">
           </div>
         </div>
   <button type="button" class="calc-btn" onclick="calculatePlate()">Calculate Plate Cost</button>
         <div class="result-box" id="plate-result">
-          <span class="result-label">Plate Cost:</span>
+          <span class="result-label">Plate Cost (per sheet):</span>
           <span class="result-value" id="plate-value">0 RS</span>
         </div>
-        <div class="formula-display">2200 × Colors</div>
+        <div class="formula-display">(Selected Plate Amount × Number of Colors) ÷ Total Sheets</div>
       </div>
 
       <!-- 2. Card -->
@@ -138,21 +158,36 @@
       <div class="calc-card" id="card-printing">
         <h3>3. Printing <span class="status-badge pending" id="status-printing" role="status" aria-label="Pending" title="Pending"></span></h3>
         <div class="input-row">
-          <div class="input-group" style="min-width:120px;">
+          <div class="input-group">
+            <label>Printing Price</label>
+            <select id="printing-amount" onchange="autoCalculate && calculatePrinting()">
+              <option value="1000">1000</option>
+              <option value="1500">1500</option>
+              <option value="400">400</option>
+            </select>
+          </div>
+          <div class="input-group">
             <label>Number of Colors</label>
-            <input type="number" id="numColors" min="1" placeholder="e.g. 1,2,4" onchange="autoCalculate && calculatePrinting()">
+            <select id="printing-colors" onchange="autoCalculate && calculatePrinting()">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
           </div>
           <div class="input-group" style="flex: 2;">
             <label>Total Sheets</label>
-            <input type="number" id="numSheets" min="1" placeholder="Enter total sheets" onchange="autoCalculate && calculatePrinting()">
+            <input type="number" id="printing-sheets" placeholder="Enter total sheets (500 - 100000)" min="500" max="100000" onchange="autoCalculate && calculatePrinting()">
           </div>
         </div>
   <button type="button" class="calc-btn" onclick="calculatePrinting()">Calculate Printing Cost</button>
         <div class="result-box" id="printing-result">
-          <span class="result-label">Printing Cost:</span>
+          <span class="result-label">Printing Cost (per sheet):</span>
           <span class="result-value" id="printing-value">0 RS</span>
         </div>
-        <div class="formula-display">Price per sheet mapping: 1 → 1.5 Rs, 2 → 3 Rs, 4 → 6 Rs. Total = pricePerSheet × Total Sheets</div>
+        <div class="formula-display">(Selected Printing Price × Number of Colors) ÷ Total Sheets</div>
       </div>
 
       <!-- 4. Lamination -->
@@ -176,9 +211,34 @@
         <div class="formula-display">L × W ÷ 62.5</div>
       </div>
 
-      <!-- 5. Dye Making -->
+      <!-- 5. UV -->
+      <div class="calc-card" id="card-uv">
+        <h3>5. UV <span class="status-badge pending" id="status-uv" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Length</label>
+            <input type="number" id="uv-length" placeholder="L" onchange="autoCalculate && calculateUV()">
+          </div>
+          <div class="input-group">
+            <label>Width</label>
+            <input type="number" id="uv-width" placeholder="W" onchange="autoCalculate && calculateUV()">
+          </div>
+          <div class="input-group" style="flex: 2;">
+            <label>Total Sheets</label>
+            <input type="number" id="uv-sheets" placeholder="Enter total sheets" min="1" onchange="autoCalculate && calculateUV()">
+          </div>
+        </div>
+        <button type="button" class="calc-btn" onclick="calculateUV()">Calculate UV Value</button>
+        <div class="result-box" id="uv-result">
+          <span class="result-label">UV Value:</span>
+          <span class="result-value" id="uv-value">0</span>
+        </div>
+        <div class="formula-display">Length × Width × 0.007 ÷ Sheets</div>
+      </div>
+
+      <!-- 6. Dye Making -->
       <div class="calc-card" id="card-dye-making">
-        <h3>5. Dye Making <span class="status-badge pending" id="status-dye-making" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <h3>6. Dye Making <span class="status-badge pending" id="status-dye-making" role="status" aria-label="Pending" title="Pending"></span></h3>
         <div class="input-row">
           <div class="input-group">
             <label>Length</label>
@@ -202,9 +262,9 @@
         <div class="formula-display">L × W × 4.5 ÷ Quantity</div>
       </div>
 
-      <!-- 6. Dye Karai -->
+      <!-- 7. Dye Karai -->
       <div class="calc-card" id="card-dye-karai">
-        <h3>6. Dye Karai <span class="status-badge pending" id="status-dye-karai" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <h3>7. Dye Karai <span class="status-badge pending" id="status-dye-karai" role="status" aria-label="Pending" title="Pending"></span></h3>
         <div class="input-row">
           <div class="input-group" style="flex: 2;">
             <label>Quantity of Sheets</label>
@@ -219,9 +279,9 @@
         <div class="formula-display">Sheets × 1 RS</div>
       </div>
 
-      <!-- 7. Binding -->
+      <!-- 8. Binding -->
       <div class="calc-card" id="card-binding">
-        <h3>7. Binding <span class="status-badge pending" id="status-binding" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <h3>8. Binding <span class="status-badge pending" id="status-binding" role="status" aria-label="Pending" title="Pending"></span></h3>
         <div class="input-row">
           <div class="input-group" style="flex: 2;">
             <label>Quantity</label>
@@ -236,9 +296,9 @@
         <div class="formula-display">400 ÷ Quantity</div>
       </div>
 
-      <!-- 8. Nali -->
+      <!-- 9. Nali -->
       <div class="calc-card" id="card-nali">
-        <h3>8. Nali <span class="status-badge pending" id="status-nali" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <h3>9. Nali <span class="status-badge pending" id="status-nali" role="status" aria-label="Pending" title="Pending"></span></h3>
         <div class="input-row">
           <div class="input-group">
             <label>Height (H)</label>
@@ -261,9 +321,9 @@
         <div class="formula-display">H × Rate ÷ 2400 × L</div>
       </div>
 
-      <!-- 9. Silicat -->
+      <!-- 10. Silicat -->
       <div class="calc-card" id="card-silicat">
-        <h3>9. Silicat <span class="status-badge pending" id="status-silicat" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <h3>10. Silicat <span class="status-badge pending" id="status-silicat" role="status" aria-label="Pending" title="Pending"></span></h3>
         <div class="input-row">
           <div class="input-group">
             <label>Length (L)</label>
@@ -284,6 +344,77 @@
           <span class="result-value" id="silicat-value">0 RS</span>
         </div>
         <div class="formula-display">L × W × 0.0035 × Qty</div>
+      </div>
+
+
+      <!-- 11. Karaya -->
+      <div class="calc-card" id="card-karaya">
+        <h3>11. Karaya <span class="status-badge pending" id="status-karaya" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Karaya Amount</label>
+            <select id="karaya-amount" onchange="autoCalculate && calculateKaraya()">
+              <option value="800">800</option>
+              <option value="1000">1000</option>
+              <option value="1500">1500</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Number of Colors</label>
+            <select id="karaya-colors" onchange="autoCalculate && calculateKaraya()">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex: 2;">
+            <label>Total Sheets</label>
+            <input type="number" id="karaya-sheets" placeholder="Enter total sheets (500 - 100000)" min="500" max="100000" onchange="autoCalculate && calculateKaraya()">
+          </div>
+        </div>
+        <button type="button" class="calc-btn" onclick="calculateKaraya()">Calculate Karaya Cost</button>
+        <div class="result-box" id="karaya-result">
+          <span class="result-label">Karaya Cost (per sheet):</span>
+          <span class="result-value" id="karaya-value">0 RS</span>
+        </div>
+        <div class="formula-display">(Selected Karaya Amount × Number of Colors) ÷ Total Sheets</div>
+      </div>
+
+      <!-- 12. Labour -->
+      <div class="calc-card" id="card-labour">
+        <h3>12. Labour <span class="status-badge pending" id="status-labour" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group" style="flex: 2;">
+            <label>Cost</label>
+            <input type="number" id="labour-cost" placeholder="Enter cost" min="0" onchange="autoCalculate && addLabour()">
+          </div>
+        </div>
+        <button type="button" class="calc-btn" onclick="addLabour()">Add to Total</button>
+        <div class="result-box" id="labour-result">
+          <span class="result-label">Labour Amount:</span>
+          <span class="result-value" id="labour-value">0 RS</span>
+        </div>
+        <div class="formula-display">Added as-is</div>
+      </div>
+
+      <!-- 13. Net Profit -->
+      <div class="calc-card" id="card-profit">
+        <h3>13. Net Profit <span class="status-badge pending" id="status-profit" role="status" aria-label="Pending" title="Pending"></span></h3>
+        <div class="input-row">
+          <div class="input-group" style="flex: 2;">
+            <label>Profit</label>
+            <input type="number" id="profit-amount" placeholder="Enter profit" min="0" onchange="autoCalculate && addProfit()">
+          </div>
+        </div>
+        <button type="button" class="calc-btn" onclick="addProfit()">Add to Total</button>
+        <div class="result-box" id="profit-result">
+          <span class="result-label">Profit Amount:</span>
+          <span class="result-value" id="profit-value">0 RS</span>
+        </div>
+        <div class="formula-display">Added as-is</div>
       </div>
     </div>
 
@@ -326,33 +457,57 @@
               <td>Not calculated yet</td>
               <td class="amount">-</td>
             </tr>
-            <tr id="row-dye-making" class="not-calculated">
+            <tr id="row-uv" class="not-calculated">
               <td>5</td>
+              <td><strong>UV</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-dye-making" class="not-calculated">
+              <td>6</td>
               <td><strong>Dye Making</strong></td>
               <td>Not calculated yet</td>
               <td class="amount">-</td>
             </tr>
             <tr id="row-dye-karai" class="not-calculated">
-              <td>6</td>
+              <td>7</td>
               <td><strong>Dye Karai</strong></td>
               <td>Not calculated yet</td>
               <td class="amount">-</td>
             </tr>
             <tr id="row-binding" class="not-calculated">
-              <td>7</td>
+              <td>8</td>
               <td><strong>Binding</strong></td>
               <td>Not calculated yet</td>
               <td class="amount">-</td>
             </tr>
             <tr id="row-nali" class="not-calculated">
-              <td>8</td>
+              <td>9</td>
               <td><strong>Nali</strong></td>
               <td>Not calculated yet</td>
               <td class="amount">-</td>
             </tr>
             <tr id="row-silicat" class="not-calculated">
-              <td>9</td>
+              <td>10</td>
               <td><strong>Silicat</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-karaya" class="not-calculated">
+              <td>11</td>
+              <td><strong>Karaya</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-labour" class="not-calculated">
+              <td>12</td>
+              <td><strong>Labour</strong></td>
+              <td>Not calculated yet</td>
+              <td class="amount">-</td>
+            </tr>
+            <tr id="row-profit" class="not-calculated">
+              <td>13</td>
+              <td><strong>Net Profit</strong></td>
               <td>Not calculated yet</td>
               <td class="amount">-</td>
             </tr>
@@ -382,8 +537,12 @@
       dyeMaking: { value: 0, calculated: false, name: 'Dye Making' },
       dyeKarai: { value: 0, calculated: false, name: 'Dye Karai' },
       binding: { value: 0, calculated: false, name: 'Binding' },
-      nali: { value: 0, calculated: false, name: 'Nali' },
-      silicat: { value: 0, calculated: false, name: 'Silicat' }
+      nali: { value:0, calculated: false, name: 'Nali' },
+      silicat: { value: 0, calculated: false, name: 'Silicat' },
+      uv: { value: 0, calculated: false, name: 'UV' },
+      karaya: { value: 0, calculated: false, name: 'Karaya' },
+      labour: { value: 0, calculated: false, name: 'Labour' },
+      profit: { value: 0, calculated: false, name: 'Net Profit' }
     };
 
     let autoCalculate = false;
@@ -436,12 +595,22 @@
     }
 
     function calculatePlate() {
-      const colors = parseFloat(document.getElementById('plate-colors').value) || 0;
-      if (colors <= 0) {
-        alert('Please enter number of colors');
+      const plateAmount = parseFloat(document.getElementById('plate-amount').value) || 0;
+      const colors = parseInt(document.getElementById('plate-colors').value, 10) || 0;
+      const totalSheets = parseInt(document.getElementById('plate-sheets').value, 10) || 0;
+
+      if (!plateAmount || colors <= 0) {
+        alert('Please select a plate amount and number of colors');
         return;
       }
-      const result = 2200 * colors;
+
+      if (!totalSheets || totalSheets < 1) {
+        alert('Please enter total sheets (min 500)');
+        return;
+      }
+
+      // Formula: (plateAmount * colors) / totalSheets
+      const result = (plateAmount * colors) / totalSheets;
       updateDisplay('plate', result);
     }
 
@@ -462,27 +631,22 @@
     }
 
     function calculatePrinting() {
-      const numColors = parseInt(document.getElementById('numColors').value, 10) || 0;
-      const numSheets = parseInt(document.getElementById('numSheets').value, 10) || 0;
+      const printingAmount = parseFloat(document.getElementById('printing-amount').value) || 0;
+      const colors = parseInt(document.getElementById('printing-colors').value, 10) || 0;
+      const totalSheets = parseInt(document.getElementById('printing-sheets').value, 10) || 0;
 
-      if (!numColors || !numSheets) {
-        alert('Please enter number of colors and total sheets');
+      if (!printingAmount || colors <= 0) {
+        alert('Please select a printing price and number of colors');
         return;
       }
 
-      let pricePerSheet = 0;
-      if (numColors === 1) {
-        pricePerSheet = 1.5;
-      } else if (numColors === 2) {
-        pricePerSheet = 3;
-      } else if (numColors === 4) {
-        pricePerSheet = 6;
-      } else {
-        // for unsupported color counts, you may set a default or handle separately
-        pricePerSheet = 0;
+      if (!totalSheets || totalSheets < 1) {
+        alert('Please enter total sheets (min 500)');
+        return;
       }
 
-      const result = pricePerSheet * numSheets;
+      // Use same formula as Plate: (printingAmount * colors) / totalSheets
+      const result = (printingAmount * colors) / totalSheets;
       updateDisplay('printing', result);
     }
 
@@ -562,6 +726,63 @@
       updateDisplay('silicat', result);
     }
 
+    function calculateUV() {
+      const length = parseFloat(document.getElementById('uv-length').value) || 0;
+      const width = parseFloat(document.getElementById('uv-width').value) || 0;
+      const sheets = parseFloat(document.getElementById('uv-sheets').value) || 0;
+
+      if (!length || !width) {
+        alert('Please enter both length and width for UV');
+        return;
+      }
+
+      if (!sheets || sheets <= 0) {
+        alert('Please enter a valid number of sheets for UV');
+        return;
+      }
+
+      const result = (length * width * 0.007) / sheets;
+      updateDisplay('uv', result);
+    }
+
+    function calculateKaraya() {
+      const karayaAmount = parseFloat(document.getElementById('karaya-amount').value) || 0;
+      const colors = parseInt(document.getElementById('karaya-colors').value, 10) || 0;
+      const totalSheets = parseInt(document.getElementById('karaya-sheets').value, 10) || 0;
+
+      if (!karayaAmount || colors <= 0) {
+        alert('Please select a karaya amount and number of colors');
+        return;
+      }
+
+      if (!totalSheets || totalSheets < 1) {
+        alert('Please enter total sheets (min 500)');
+        return;
+      }
+
+      const result = (karayaAmount * colors) / totalSheets;
+      updateDisplay('karaya', result);
+    }
+
+    function addLabour() {
+      const cost = parseFloat(document.getElementById('labour-cost').value) || 0;
+      if (cost <= 0) {
+        alert('Please enter a labour amount greater than 0');
+        return;
+      }
+      updateDisplay('labour', cost);
+    }
+
+    function addProfit() {
+      const profit = parseFloat(document.getElementById('profit-amount').value) || 0;
+      if (profit <= 0) {
+        alert('Please enter a profit amount greater than 0');
+        return;
+      }
+      updateDisplay('profit', profit);
+    }
+
+
     function calculateAll() {
       // Try to calculate all that have values
       const colors = document.getElementById('plate-colors').value;
@@ -579,6 +800,10 @@
 
       if (document.getElementById('lam-length').value && document.getElementById('lam-width').value) {
         calculateLamination();
+      }
+
+      if (document.getElementById('uv-length').value && document.getElementById('uv-width').value && document.getElementById('uv-sheets').value) {
+        calculateUV();
       }
 
       if (document.getElementById('dye-length').value && 
@@ -601,6 +826,19 @@
         document.getElementById('silicat-width').value && 
         document.getElementById('silicat-qty').value) {
         calculateSilicat();
+      }
+
+      if (document.getElementById('karaya-amount') && document.getElementById('karaya-amount').value) {
+        calculateKaraya();
+      }
+
+      // handle optional labour value if present
+      if (document.getElementById('labour-cost') && document.getElementById('labour-cost').value) {
+        addLabour();
+      }
+
+      if (document.getElementById('profit-amount') && document.getElementById('profit-amount').value) {
+        addProfit();
       }
 
       // Scroll to summary
